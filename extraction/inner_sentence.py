@@ -49,7 +49,7 @@ def read_sentence(raw_file, feature_file):
                         line = line.split()
                         l = len(line)
                         # 处理每一对实体
-                        # 特征顺序：CID,化学物质位置,疾病位置,距离,顺序
+                        # 特征顺序：CID,化学物质位置,疾病位置,距离,顺序,包含化学物质数量,包含疾病数量,包含化学物质种类,包含疾病种类,是否在标题中
                         for key, value in all_entities.items():
                             chemical_pos = key[0][0]  # 化学物质位置
                             chemical = key[0][1]
@@ -68,12 +68,14 @@ def read_sentence(raw_file, feature_file):
                             other_disease_number = others[1]
                             other_chemical_kind = others[2]
                             other_disease_kind = others[3]
-                            fw.write("%d %d %d %f %d %d %d %d %d\t%s\t%s\n" % (
+                            fw.write("%2d %2d %2d %10f %2d %2d %2d %2d %2d %2d\t%s\t%s\n" % (
                                 is_cid, chemical_pos, disease_pos, distance, order, other_chemical_number,
-                                other_disease_number, other_chemical_kind, other_disease_kind, chemical, disease))
+                                other_disease_number, other_chemical_kind, other_disease_kind, title_flag, chemical,
+                                disease))
                 line = fp.readline()
             passage = line
             fw.write(passage)
+    fw.close()
 
 
 # 判断句子内是否存在实体对
@@ -155,6 +157,7 @@ if __name__ == "__main__":
     feature_file_list = ["feature/train.txt", "feature/develop.txt", "feature/test.txt"]
 
     # sentence = "In brain membranes from spontaneously D_D006973 rats C_D003000 , 10 ( -8 ) to 10 ( -5 ) M , did not influence stereoselective binding of [ 3H ] -C_D009270 ( 8 nM ) , and C_D009270 , 10 ( -8 ) to 10 ( -4 ) M , did not influence C_D003000-suppressible binding of C_-1 ( 1 nM ) ."
+
     read_CID("replace/train.txt")
     for raw_file, feature_file in zip(raw_file_list, feature_file_list):
         read_sentence(raw_file, feature_file)
