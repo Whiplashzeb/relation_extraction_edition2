@@ -45,7 +45,7 @@ def read_sentence(raw_file, statistics_file, feature_file):
                         title_flag = 1
                         line = line[11:]
                     # 识别出全部共现的实体对
-                    if contain_entity(line):
+                    if contain_entities(line):
                         all_entities = extract_all_entities(line)
                         line = line.split()
                         l = len(line)
@@ -83,7 +83,7 @@ def read_sentence(raw_file, statistics_file, feature_file):
 
 
 # 判断句子内是否存在实体对
-def contain_entity(sentence):
+def contain_entities(sentence):
     sentence = sentence.split()
 
     contain_chemical = False

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import re
-from inner_sentence import contain_entity
+from inner_sentence import contain_entities
 
 
 def count(raw_file, statistics_file):
@@ -20,7 +20,7 @@ def count(raw_file, statistics_file):
                 if line == 'title:\n' or line == 'abstract:\n' or line.startswith("CID"):
                     pass
                 else:
-                    if contain_entity(line):
+                    if contain_entities(line):
                         all_entities = extract_all_entities(line)
                         for c, d in all_entities:
                             if c not in chemical.keys():
@@ -35,6 +35,19 @@ def count(raw_file, statistics_file):
                                 entities[(c, d)] = 1
                             else:
                                 entities[(c, d)] += 1
+                    elif contain_entity(line):
+                        entity = extract_entity(line)
+                        for en in entity:
+                            if en.startswith("C_"):
+                                if en not in chemical.keys():
+                                    chemical[en] = 1
+                                else:
+                                    chemical[en] += 1
+                            else:
+                                if en not in disease.keys():
+                                    disease[en] = 1
+                                else:
+                                    disease[en] += 1
                 line = fp.readline()
             for c, i in chemical.items():
                 fw.write("%s\t%d\n" % (c, i))
@@ -45,6 +58,43 @@ def count(raw_file, statistics_file):
             passage = line
             fw.write(passage)
     fw.close()
+
+
+# 查找只包含一种实体的句子
+def contain_entity(sentence):
+    sentence = sentence.split()
+
+    contain_chemical = False
+    contain_disease = False
+
+    for word in sentence:
+        if "C_D" in word or "C_C" in word:
+            contain_chemical = True
+        if "D_D" in word or "D_C" in word:
+            contain_disease = True
+
+    if (contain_chemical and (not contain_disease)) or ((not contain_chemical) and contain_disease):
+        return True
+    else:
+        return False
+
+
+def extract_entity(sentence):
+    entity = []
+
+    sentence = sentence.split()
+    for word in sentence:
+        if "C_D" in word or "C_C" in word:
+            pattern = re.compile(r'C_D[-]*\d+|C_C[-]*\d+')
+            match = pattern.search(word)
+            if match:
+                entity.append(match.group())
+        if "D_D" in word or "D_D" in word:
+            pattern = re.compile(r'D_D[-]*\d+|D_C[-]*\d+')
+            match = pattern.search(word)
+            if match:
+                entity.append(match.group())
+    return entity
 
 
 def extract_all_entities(sentence):
