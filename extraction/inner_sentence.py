@@ -20,7 +20,7 @@ def read_CID(file):
 
 
 # 抽取特征函数
-def read_sentence(raw_file, feature_file):
+def read_sentence(raw_file, statistics_file, feature_file):
     fw = open(feature_file, 'w')
 
     # 0 标记标题 1 标记摘要
@@ -32,6 +32,7 @@ def read_sentence(raw_file, feature_file):
         fw.write(passage)
 
         while len(passage) > 0:
+            all_chemical, all_disease, all_cid = get_number(passage, statistics_file)
             line = fp.readline()
             while "passage" not in line and len(line) > 0:
                 if line == 'title:\n' or line == 'abstract:\n' or line.startswith("CID"):
@@ -49,7 +50,7 @@ def read_sentence(raw_file, feature_file):
                         line = line.split()
                         l = len(line)
                         # 处理每一对实体
-                        # 特征顺序：CID,化学物质位置,疾病位置,距离,顺序,包含化学物质数量,包含疾病数量,包含化学物质种类,包含疾病种类,是否在标题中
+                        # 特征顺序：CID,化学物质位置,疾病位置,距离,顺序,化学物质出现次数,疾病出现次数,关系出现次数,包含化学物质数量,包含疾病数量,包含化学物质种类,包含疾病种类,是否在标题中
                         for key, value in all_entities.items():
                             chemical_pos = key[0][0]  # 化学物质位置
                             chemical = key[0][1]
@@ -60,6 +61,9 @@ def read_sentence(raw_file, feature_file):
                             order = 0  # 化学物质在前
                             if chemical_pos > disease_pos:
                                 order = 1
+                            chemical_number = all_chemical[chemical]
+                            disease_number = all_disease[disease]
+                            cid_number = all_cid[(chemical, disease)]
                             if order == 0:
                                 others = contain_others(line[chemical_pos + 1:disease_pos])
                             else:
@@ -68,10 +72,10 @@ def read_sentence(raw_file, feature_file):
                             other_disease_number = others[1]
                             other_chemical_kind = others[2]
                             other_disease_kind = others[3]
-                            fw.write("%2d %2d %2d %10f %2d %2d %2d %2d %2d %2d\t%s\t%s\n" % (
-                                is_cid, chemical_pos, disease_pos, distance, order, other_chemical_number,
-                                other_disease_number, other_chemical_kind, other_disease_kind, title_flag, chemical,
-                                disease))
+                            fw.write("%2d %2d %2d %10f %2d %2d %2d %2d %2d %2d %2d %2d %2d\t%s\t%s\n" % (
+                                is_cid, chemical_pos, disease_pos, distance, order, chemical_number, disease_number,
+                                cid_number, other_chemical_number, other_disease_number, other_chemical_kind,
+                                other_disease_kind, title_flag, chemical, disease))
                 line = fp.readline()
             passage = line
             fw.write(passage)
@@ -152,12 +156,39 @@ def contain_others(sentence):
     return res
 
 
+def get_number(passage_get, statistics_file):
+    chemical = {}
+    disease = {}
+    cid = {}
+    with open(statistics_file) as fp:
+        passage = fp.readline()
+        while len(passage) > 0:
+            if passage_get == passage:
+                line = fp.readline()
+                while (not line.startswith("passage")) and len(line) > 0:
+                    line = line.split()
+                    if len(line) == 2:
+                        if line[0].startswith('C_'):
+                            chemical[line[0]] = int(line[1])
+                        else:
+                            disease[line[0]] = int(line[1])
+                    elif len(line) == 3:
+                        cid[(line[0], line[1])] = int(line[2])
+                    line = fp.readline()
+                break
+            else:
+                passage = fp.readline()
+
+    return (chemical, disease, cid)
+
+
 if __name__ == "__main__":
     raw_file_list = ["replace/train.txt", "replace/develop.txt", "replace/test.txt"]
     feature_file_list = ["feature/train.txt", "feature/develop.txt", "feature/test.txt"]
+    statistics_file_list = ["statistics/train.txt", "statistics/develop.txt", "statistics/test.txt"]
 
     # sentence = "In brain membranes from spontaneously D_D006973 rats C_D003000 , 10 ( -8 ) to 10 ( -5 ) M , did not influence stereoselective binding of [ 3H ] -C_D009270 ( 8 nM ) , and C_D009270 , 10 ( -8 ) to 10 ( -4 ) M , did not influence C_D003000-suppressible binding of C_-1 ( 1 nM ) ."
 
     read_CID("replace/train.txt")
-    for raw_file, feature_file in zip(raw_file_list, feature_file_list):
-        read_sentence(raw_file, feature_file)
+    for raw_file, statistics_file, feature_file in zip(raw_file_list, statistics_file_list, feature_file_list):
+        read_sentence(raw_file, statistics_file, feature_file)
