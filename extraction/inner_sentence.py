@@ -189,6 +189,6 @@ if __name__ == "__main__":
 
     # sentence = "In brain membranes from spontaneously D_D006973 rats C_D003000 , 10 ( -8 ) to 10 ( -5 ) M , did not influence stereoselective binding of [ 3H ] -C_D009270 ( 8 nM ) , and C_D009270 , 10 ( -8 ) to 10 ( -4 ) M , did not influence C_D003000-suppressible binding of C_-1 ( 1 nM ) ."
 
-    read_CID("replace/train.txt")
     for raw_file, statistics_file, feature_file in zip(raw_file_list, statistics_file_list, feature_file_list):
+        read_CID(raw_file)
         read_sentence(raw_file, statistics_file, feature_file)
