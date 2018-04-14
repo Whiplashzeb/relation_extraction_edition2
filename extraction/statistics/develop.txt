@@ -446,22 +446,18 @@ C_D004967	D_D005705	1
 C_D004967	D_D009369	1
 C_D004967	D_D002318	1
 passage:17019386
-C_D008353	5
-D_D005910	1
+C_D008353	15
+D_D005910	4
 D_D001929	1
 D_D019586	1
-D_D001932	1
-C_D008353	D_D005910	1
-C_D008353	D_D001929	1
-C_D008353	D_D019586	1
-C_D008353	D_D001932	1
-As a contribution to this issue we decided to research the possible passage of C_D008353 into the brain after administration to 21 D_D001932 patients . 
-C_D008353	9
-D_D005910	3
+D_D001932	2
 D_D009362	2
 D_D008579	2
 D_D004487	2
-C_D008353	D_D005910	3
+C_D008353	D_D005910	4
+C_D008353	D_D001929	1
+C_D008353	D_D019586	1
+C_D008353	D_D001932	2
 C_D008353	D_D009362	2
 C_D008353	D_D008579	2
 C_D008353	D_D004487	1
@@ -2940,8 +2936,6 @@ C_D016559	D_D012393	1
 C_D016559	D_D003875	1
 C_C117268	D_D003872	1
 passage:19944736
-title : A novel animal model to evaluate the ability of a drug delivery system to promote the passage through the BBB . 
-abstract : The purpose of this investigation was to explore the potentiality of a novel animal model to be used for the in vivo evaluation of the ability of a drug delivery system to promote the passage through the blood-brain barrier ( BBB ) and/or to improve the brain localization of a bioactive compound . 
 C_D013619	8
 C_D018021	3
 D_D012640	2

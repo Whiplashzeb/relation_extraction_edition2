@@ -16,7 +16,7 @@ def count(raw_file, statistics_file):
             disease = {}
             entities = {}
             line = fp.readline()
-            while "passage" not in line and len(line) > 0:
+            while not line.startswith("passage") and len(line) > 0:
                 if line == 'title:\n' or line == 'abstract:\n' or line.startswith("CID"):
                     pass
                 else:
@@ -129,3 +129,4 @@ if __name__ == "__main__":
 
     for raw_file, statistics_file in zip(raw_file_list, statistics_file_list):
         count(raw_file, statistics_file)
+

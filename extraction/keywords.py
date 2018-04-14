@@ -144,7 +144,7 @@ if __name__ == "__main__":
                 continue
             if word.isdigit() or word in string.punctuation:
                 continue
-            fp.write(word + ' ' + str(value) + '\n')
+            fp.write(word + '\n')
 
     with open("keywords/bigram.txt", 'w') as fp:
         for word, value in chi_two:
@@ -152,4 +152,4 @@ if __name__ == "__main__":
                 continue
             if contain_number_or_punctuation(word):
                 continue
-            fp.write(word + ' ' + str(value) + '\n')
+            fp.write(word + '\n')

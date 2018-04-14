@@ -1114,7 +1114,6 @@ D_D010146	1
 C_D013256	D_D009422	2
 C_D013256	D_D013716	2
 C_D013256	D_D010292	2
-An electrodiagnostic study , including a nerve conduction study of the LACN , was helpful to diagnose right LACNP and to find the passage of the LACN on the lateral epicondyle . 
 passage:25119790
 C_D003474	6
 C_C030272	11
@@ -4277,18 +4276,13 @@ D_D008223	1
 C_D014750	D_D007010	5
 C_D014750	D_D007177	7
 passage:12059909
-C_D003520	8
-D_D064420	2
+C_D003520	9
+D_D064420	3
 D_D006470	1
-D_D003556	2
-C_D003520	D_D064420	2
+D_D003556	5
+C_D003520	D_D064420	3
 C_D003520	D_D006470	1
 C_D003520	D_D003556	2
-Delayed D_D003556 was characterized by infiltration and transepithelial passage into the lumen of inflammatory cells and by frequent exfoliation of the urothelium . 
-C_D003520	1
-D_D003556	2
-D_D064420	1
-C_D003520	D_D064420	1
 passage:12119460
 C_D005472	11
 C_D002955	11

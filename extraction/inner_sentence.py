@@ -3,6 +3,7 @@ import re
 
 # 保存全部的CID关系
 CID = {}
+keywords = []
 
 
 # 读取全部的CID关系
@@ -17,6 +18,16 @@ def read_CID(file):
                 else:
                     CID[line[1]] = [line[2]]
             line = fp.readline()
+
+
+# 读取关键词unigram和bigram
+def read_keywords(file, num):
+    count = 0
+    with open(file) as fp:
+        while count < num:
+            line = fp.readline()[:-1]
+            keywords.append(line)
+            count += 1
 
 
 # 抽取特征函数
@@ -34,7 +45,7 @@ def read_sentence(raw_file, statistics_file, feature_file):
         while len(passage) > 0:
             all_chemical, all_disease, all_cid = get_number(passage, statistics_file)
             line = fp.readline()
-            while "passage" not in line and len(line) > 0:
+            while not line.startswith("passage") and len(line) > 0:
                 if line == 'title:\n' or line == 'abstract:\n' or line.startswith("CID"):
                     pass
                 else:
@@ -47,10 +58,11 @@ def read_sentence(raw_file, statistics_file, feature_file):
                     # 识别出全部共现的实体对
                     if contain_entities(line):
                         all_entities = extract_all_entities(line)
+                        kwords = contain_keywords(line, 50)
                         line = line.split()
                         l = len(line)
                         # 处理每一对实体
-                        # 特征顺序：CID,化学物质位置,疾病位置,距离,顺序,化学物质出现次数,疾病出现次数,关系出现次数,包含化学物质数量,包含疾病数量,包含化学物质种类,包含疾病种类,是否在标题中
+                        # 特征顺序：CID,化学物质位置,疾病位置,距离,顺序,化学物质出现次数,疾病出现次数,关系出现次数,包含化学物质数量,包含疾病数量,包含化学物质种类,包含疾病种类,是否在标题中,关键词特征
                         for key, value in all_entities.items():
                             chemical_pos = key[0][0]  # 化学物质位置
                             chemical = key[0][1]
@@ -72,10 +84,13 @@ def read_sentence(raw_file, statistics_file, feature_file):
                             other_disease_number = others[1]
                             other_chemical_kind = others[2]
                             other_disease_kind = others[3]
-                            fw.write("%2d %2d %2d %10f %2d %2d %2d %2d %2d %2d %2d %2d %2d\t%s\t%s\n" % (
+                            fw.write("%2d %2d %2d %10f %2d %2d %2d %2d %2d %2d %2d %2d %2d" % (
                                 is_cid, chemical_pos, disease_pos, distance, order, chemical_number, disease_number,
                                 cid_number, other_chemical_number, other_disease_number, other_chemical_kind,
-                                other_disease_kind, title_flag, chemical, disease))
+                                other_disease_kind, title_flag))
+                            for i in kwords:
+                                fw.write(" %2d" % (i))
+                            fw.write("\t%s\t%s\n" % (chemical, disease))
                 line = fp.readline()
             passage = line
             fw.write(passage)
@@ -156,6 +171,7 @@ def contain_others(sentence):
     return res
 
 
+# 统计实体对中实体在文章中出现的次数和共现次数
 def get_number(passage_get, statistics_file):
     chemical = {}
     disease = {}
@@ -182,13 +198,35 @@ def get_number(passage_get, statistics_file):
     return (chemical, disease, cid)
 
 
+# 统计句内是否出现了关键词
+def contain_keywords(sentence, num):
+    words = sentence.split()
+    res = []
+    for i in range(len(keywords)):
+        if i < num:
+            if keywords[i] in words:
+                res.append(1)
+                print(keywords[i])
+            else:
+                res.append(0)
+        else:
+            if keywords[i] in sentence:
+                res.append(1)
+                print(keywords[i])
+            else:
+                res.append(0)
+    return res
+
+
 if __name__ == "__main__":
     raw_file_list = ["replace/train.txt", "replace/develop.txt", "replace/test.txt"]
     feature_file_list = ["feature/train.txt", "feature/develop.txt", "feature/test.txt"]
     statistics_file_list = ["statistics/train.txt", "statistics/develop.txt", "statistics/test.txt"]
+    keywords_file_list = ["keywords/unigram.txt", "keywords/bigram.txt"]
 
     # sentence = "In brain membranes from spontaneously D_D006973 rats C_D003000 , 10 ( -8 ) to 10 ( -5 ) M , did not influence stereoselective binding of [ 3H ] -C_D009270 ( 8 nM ) , and C_D009270 , 10 ( -8 ) to 10 ( -4 ) M , did not influence C_D003000-suppressible binding of C_-1 ( 1 nM ) ."
-
+    for keywords_file in keywords_file_list:
+        read_keywords(keywords_file, 50)
     for raw_file, statistics_file, feature_file in zip(raw_file_list, statistics_file_list, feature_file_list):
         read_CID(raw_file)
         read_sentence(raw_file, statistics_file, feature_file)
