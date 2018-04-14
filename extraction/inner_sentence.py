@@ -31,8 +31,9 @@ def read_keywords(file, num):
 
 
 # 抽取特征函数
-def read_sentence(raw_file, statistics_file, feature_file):
+def read_sentence(raw_file, statistics_file, feature_file, CID_file):
     fw = open(feature_file, 'w')
+    fCID = open(CID_file, 'w')
 
     # 0 标记标题 1 标记摘要
     title_flag = 0
@@ -40,7 +41,6 @@ def read_sentence(raw_file, statistics_file, feature_file):
     with open(raw_file) as fp:
         # 标记文章
         passage = fp.readline()
-        fw.write(passage)
 
         while len(passage) > 0:
             all_chemical, all_disease, all_cid = get_number(passage, statistics_file)
@@ -84,17 +84,18 @@ def read_sentence(raw_file, statistics_file, feature_file):
                             other_disease_number = others[1]
                             other_chemical_kind = others[2]
                             other_disease_kind = others[3]
-                            fw.write("%2d %2d %2d %10f %2d %2d %2d %2d %2d %2d %2d %2d %2d" % (
+                            fw.write("%d 1:%d 2:%d 3:%f 4:%d 5:%d 6:%d 7:%d 8:%d 9:%d 10:%d 11:%d 12:%d" % (
                                 is_cid, chemical_pos, disease_pos, distance, order, chemical_number, disease_number,
                                 cid_number, other_chemical_number, other_disease_number, other_chemical_kind,
                                 other_disease_kind, title_flag))
-                            for i in kwords:
-                                fw.write(" %2d" % (i))
-                            fw.write("\t%s\t%s\n" % (chemical, disease))
+                            for i, value in enumerate(kwords):
+                                fw.write(" %d:%d" % (i + 13, value))
+                            fw.write('\n')
+                            fCID.write("%s\t%s\n" % (chemical, disease))
                 line = fp.readline()
             passage = line
-            fw.write(passage)
     fw.close()
+    fCID.close()
 
 
 # 判断句子内是否存在实体对
@@ -221,12 +222,14 @@ def contain_keywords(sentence, num):
 if __name__ == "__main__":
     raw_file_list = ["replace/train.txt", "replace/develop.txt", "replace/test.txt"]
     feature_file_list = ["feature/train.txt", "feature/develop.txt", "feature/test.txt"]
+    CID_file_list = ["CID_extract/train.txt", "CID_extract/develop.txt", "CID_extract/test.txt"]
     statistics_file_list = ["statistics/train.txt", "statistics/develop.txt", "statistics/test.txt"]
     keywords_file_list = ["keywords/unigram.txt", "keywords/bigram.txt"]
 
     # sentence = "In brain membranes from spontaneously D_D006973 rats C_D003000 , 10 ( -8 ) to 10 ( -5 ) M , did not influence stereoselective binding of [ 3H ] -C_D009270 ( 8 nM ) , and C_D009270 , 10 ( -8 ) to 10 ( -4 ) M , did not influence C_D003000-suppressible binding of C_-1 ( 1 nM ) ."
     for keywords_file in keywords_file_list:
         read_keywords(keywords_file, 50)
-    for raw_file, statistics_file, feature_file in zip(raw_file_list, statistics_file_list, feature_file_list):
+    for raw_file, statistics_file, feature_file, CID_file in zip(raw_file_list, statistics_file_list, feature_file_list,
+                                                                 CID_file_list):
         read_CID(raw_file)
-        read_sentence(raw_file, statistics_file, feature_file)
+        read_sentence(raw_file, statistics_file, feature_file, CID_file)
