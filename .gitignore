@@ -10,6 +10,8 @@ __pycache__/
 temp.py
 .DS_Store
 keywords
+feature
+inner_sentence.py
 
 # Distribution / packaging
 .Python
