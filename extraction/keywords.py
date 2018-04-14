@@ -1,5 +1,6 @@
 from inner_sentence import contain_entities
 import re
+import string
 
 # 保存全部的CID关系
 CID = {}
@@ -115,6 +116,14 @@ def extract_keywords():
     return chi_one, chi_two
 
 
+def contain_number_or_punctuation(words):
+    words = words.split()
+    for word in words:
+        if word.isdigit() or word in string.punctuation:
+            return True
+    return False
+
+
 if __name__ == "__main__":
     extract_file_list = ["replace/train.txt"]
 
@@ -133,10 +142,14 @@ if __name__ == "__main__":
         for word, value in chi_one:
             if word.find("C_") != -1 or word.find("D_") != -1:
                 continue
+            if word.isdigit() or word in string.punctuation:
+                continue
             fp.write(word + ' ' + str(value) + '\n')
 
     with open("keywords/bigram.txt", 'w') as fp:
         for word, value in chi_two:
             if word.find("C_") != -1 or word.find("D_") != -1:
+                continue
+            if contain_number_or_punctuation(word):
                 continue
             fp.write(word + ' ' + str(value) + '\n')
