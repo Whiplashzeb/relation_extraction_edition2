@@ -13,6 +13,8 @@ keywords
 feature
 inner_sentence.py
 libsvm
+scale
+model
 
 # Distribution / packaging
 .Python
