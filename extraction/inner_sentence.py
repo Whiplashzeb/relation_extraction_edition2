@@ -44,7 +44,8 @@ def read_sentence(raw_file, statistics_file, feature_file, CID_file):
 
         while len(passage) > 0:
             title = ""
-            all_chemical, all_disease, all_cid = get_number(passage, statistics_file)
+            all_chemical, all_disease, all_cid, all_chemical_num, all_disease_num, all_cid_num = get_number(passage,
+                                                                                                            statistics_file)
             line = fp.readline()
             while not line.startswith("passage") and len(line) > 0:
                 if line == 'title:\n' or line == 'abstract:\n' or line.startswith("CID"):
@@ -64,7 +65,9 @@ def read_sentence(raw_file, statistics_file, feature_file, CID_file):
                         line = line.split()
                         l = len(line)
                         # 处理每一对实体
-                        # 特征顺序：CID,化学物质位置,疾病位置,距离,顺序,化学物质出现次数,疾病出现次数,关系出现次数,包含化学物质数量,包含疾病数量,包含化学物质种类,包含疾病种类,是否在标题中,关键词特征
+                        # 特征顺序：CID,化学物质位置,疾病位置,距离,顺序,化学物质出现次数,疾病出现次数,关系出现次数,化学物质频率，
+                        # 疾病频率，共现频率，包含化学物质数量,包含疾病数量,包含化学物质种类,包含疾病种类,是否在标题中,
+                        # 化学物质是否出现在标题，疾病是否出现在标题，实体对是否出现在标题，关键词特征
                         for key, value in all_entities.items():
                             chemical_pos = key[0][0]  # 化学物质位置
                             chemical = key[0][1]
@@ -78,6 +81,9 @@ def read_sentence(raw_file, statistics_file, feature_file, CID_file):
                             chemical_number = all_chemical[chemical]  # 化学物质出现次数
                             disease_number = all_disease[disease]  # 疾病出现次数
                             cid_number = all_cid[(chemical, disease)]  # 共现次数
+                            chemical_freq = float(chemical_number) / all_chemical_num  # 化学物质出现频率
+                            disease_freq = float(disease_number) / all_disease_num  # 疾病出现频率
+                            cid_freq = float(cid_number) / all_cid_num
                             if order == 0:
                                 others = contain_others(line[chemical_pos + 1:disease_pos])
                             else:
@@ -88,12 +94,14 @@ def read_sentence(raw_file, statistics_file, feature_file, CID_file):
                             other_disease_kind = others[3]  # 包含其他疾病种类
                             chemical_in, disease_in, entities_in = in_title(chemical, disease, title)  # 是否出现在标题中
                             fw.write(
-                                "%d 1:%d 2:%d 3:%f 4:%d 5:%d 6:%d 7:%d 8:%d 9:%d 10:%d 11:%d 12:%d 13:%d 14:%d 15:%d" % (
+                                "%d 1:%d 2:%d 3:%f 4:%d 5:%d 6:%d 7:%d 8:%f 9:%f 10:%f 11:%d 12:%d 13:%d 14:%d 15:%d 16:%d 17:%d 18:%d" % (
                                     is_cid, chemical_pos, disease_pos, distance, order, chemical_number, disease_number,
-                                    cid_number, other_chemical_number, other_disease_number, other_chemical_kind,
-                                    other_disease_kind, title_flag, chemical_in, disease_in, entities_in))
+                                    cid_number, chemical_freq, disease_freq, cid_freq, other_chemical_number,
+                                    other_disease_number, other_chemical_kind, other_disease_kind, title_flag,
+                                    chemical_in,
+                                    disease_in, entities_in))
                             for i, value in enumerate(kwords):
-                                fw.write(" %d:%d" % (i + 16, value))
+                                fw.write(" %d:%d" % (i + 19, value))
                             fw.write('\n')
                             fCID.write("%s\t%s\n" % (chemical, disease))
                 line = fp.readline()
@@ -200,7 +208,16 @@ def get_number(passage_get, statistics_file):
             else:
                 passage = fp.readline()
 
-    return (chemical, disease, cid)
+    chemical_count = 0
+    for _, value in chemical.items():
+        chemical_count += value
+    disease_count = 0
+    for _, value in disease.items():
+        disease_count += value
+    cid_count = 0
+    for _, value in cid.items():
+        cid_count += value
+    return (chemical, disease, cid, chemical_count, disease_count, cid_count)
 
 
 # 统计句内是否出现了关键词
