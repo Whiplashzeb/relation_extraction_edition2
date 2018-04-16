@@ -43,6 +43,7 @@ def read_sentence(raw_file, statistics_file, feature_file, CID_file):
         passage = fp.readline()
 
         while len(passage) > 0:
+            title = ""
             all_chemical, all_disease, all_cid = get_number(passage, statistics_file)
             line = fp.readline()
             while not line.startswith("passage") and len(line) > 0:
@@ -52,6 +53,7 @@ def read_sentence(raw_file, statistics_file, feature_file, CID_file):
                     if line.startswith("title"):
                         title_flag = 0
                         line = line[8:]
+                        title = line
                     elif line.startswith("abstract"):
                         title_flag = 1
                         line = line[11:]
@@ -73,23 +75,25 @@ def read_sentence(raw_file, statistics_file, feature_file, CID_file):
                             order = 0  # 化学物质在前
                             if chemical_pos > disease_pos:
                                 order = 1
-                            chemical_number = all_chemical[chemical]
-                            disease_number = all_disease[disease]
-                            cid_number = all_cid[(chemical, disease)]
+                            chemical_number = all_chemical[chemical]  # 化学物质出现次数
+                            disease_number = all_disease[disease]  # 疾病出现次数
+                            cid_number = all_cid[(chemical, disease)]  # 共现次数
                             if order == 0:
                                 others = contain_others(line[chemical_pos + 1:disease_pos])
                             else:
                                 others = contain_others(line[disease_pos + 1:chemical_pos])
-                            other_chemical_number = others[0]
-                            other_disease_number = others[1]
-                            other_chemical_kind = others[2]
-                            other_disease_kind = others[3]
-                            fw.write("%d 1:%d 2:%d 3:%f 4:%d 5:%d 6:%d 7:%d 8:%d 9:%d 10:%d 11:%d 12:%d" % (
-                                is_cid, chemical_pos, disease_pos, distance, order, chemical_number, disease_number,
-                                cid_number, other_chemical_number, other_disease_number, other_chemical_kind,
-                                other_disease_kind, title_flag))
+                            other_chemical_number = others[0]  # 包含其他化学物质数量
+                            other_disease_number = others[1]  # 包含其他疾病数量
+                            other_chemical_kind = others[2]  # 包含其他化学物质种类
+                            other_disease_kind = others[3]  # 包含其他疾病种类
+                            chemical_in, disease_in, entities_in = in_title(chemical, disease, title)  # 是否出现在标题中
+                            fw.write(
+                                "%d 1:%d 2:%d 3:%f 4:%d 5:%d 6:%d 7:%d 8:%d 9:%d 10:%d 11:%d 12:%d 13:%d 14:%d 15:%d" % (
+                                    is_cid, chemical_pos, disease_pos, distance, order, chemical_number, disease_number,
+                                    cid_number, other_chemical_number, other_disease_number, other_chemical_kind,
+                                    other_disease_kind, title_flag, chemical_in, disease_in, entities_in))
                             for i, value in enumerate(kwords):
-                                fw.write(" %d:%d" % (i + 13, value))
+                                fw.write(" %d:%d" % (i + 16, value))
                             fw.write('\n')
                             fCID.write("%s\t%s\n" % (chemical, disease))
                 line = fp.readline()
@@ -207,16 +211,29 @@ def contain_keywords(sentence, num):
         if i < num:
             if keywords[i] in words:
                 res.append(1)
-                print(keywords[i])
             else:
                 res.append(0)
         else:
             if keywords[i] in sentence:
                 res.append(1)
-                print(keywords[i])
             else:
                 res.append(0)
     return res
+
+
+# 判断化学物质，疾病，实体对是否在
+def in_title(chemical, disease, title):
+    chemical_in = 0
+    disease_in = 0
+    entities_in = 0
+    if chemical in title:
+        chemical_in = 1
+    if disease in title:
+        disease_in = 1
+    if chemical_in == 1 and disease_in == 1:
+        entities_in = 1
+
+    return (chemical_in, disease_in, entities_in)
 
 
 if __name__ == "__main__":

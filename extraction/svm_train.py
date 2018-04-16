@@ -10,8 +10,8 @@ def extraction(file_label, file_entity):
         r = fp1[i].split()[0][0]
         if r == '1':
             entity = fp2[i].split()
-            res.add((entity[1], entity[2]))
-
+            res.add((entity[0], entity[1]))
+    return res
 
 def standard(file_standard):
     result = set()
@@ -25,20 +25,21 @@ def standard(file_standard):
 
 
 if __name__ == "__main__":
-    parameter = ""
-    y_train, x_train = svm_read_problem("feature/train.txt")
-    y_develop, x_develop = svm_read_problem("feature/develop.txt")
+    parameter = "-c 128.0 -g 0.03125"
+    y_train, x_train = svm_read_problem("scale/train.scale")
+    y_develop, x_develop = svm_read_problem("scale/develop.scale")
     model = svm_train(y_train, x_train, parameter)
     svm_save_model("model/first.model", model)
 
+    model = svm_load_model("model/first.model")
     p_label, p_acc, p_val = svm_predict(y_develop, x_develop, model)
 
-    with open("result/develop.txt") as fp:
+    with open("result/develop.txt", 'w') as fp:
         for label, val in zip(p_label, p_val):
             fp.write(str(label) + '\t' + str(val[0]) + '\n')
 
     cid_r = extraction("result/develop.txt", "CID_extract/develop.txt")
-    cid_s = standard("CID_standard/develop.txt")
+    cid_s = standard("CID_standard_in/develop.txt")
 
     count = 0
     for cid in cid_r:
