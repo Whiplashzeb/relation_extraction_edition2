@@ -13,6 +13,7 @@ def extraction(file_label, file_entity):
             res.add((entity[0], entity[1]))
     return res
 
+
 def standard(file_standard):
     result = set()
     with open(file_standard) as fp:
@@ -25,7 +26,7 @@ def standard(file_standard):
 
 
 if __name__ == "__main__":
-    parameter = "-c 128.0 -g 0.03125"
+    parameter = "-c 512.0 -g 0.03125"
     y_train, x_train = svm_read_problem("scale/train.scale")
     y_develop, x_develop = svm_read_problem("scale/develop.scale")
     model = svm_train(y_train, x_train, parameter)
@@ -51,7 +52,5 @@ if __name__ == "__main__":
 
     F = 2 * count / (extract_total + standard_total)
 
-    print(
-        "%d\t%d\t%d\t%.4f%%\t%.4f%%\t%.4f%%\n" % (
-            count, extract_total, standard_total, count / extract_total * 100, count / standard_total * 100,
-            F * 100))
+    print("%d\t%d\t%d\t%.4f%%\t%.4f%%\t%.4f%%\n" % (
+    count, extract_total, standard_total, count / extract_total * 100, count / standard_total * 100, F * 100))

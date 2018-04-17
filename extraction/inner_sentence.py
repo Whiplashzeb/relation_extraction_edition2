@@ -31,7 +31,7 @@ def read_keywords(file, num):
 
 
 # 抽取特征函数
-def read_sentence(raw_file, statistics_file, feature_file, CID_file):
+def read_sentence(raw_file, statistics_file, feature_file, CID_file, key_num):
     fw = open(feature_file, 'w')
     fCID = open(CID_file, 'w')
 
@@ -61,7 +61,7 @@ def read_sentence(raw_file, statistics_file, feature_file, CID_file):
                     # 识别出全部共现的实体对
                     if contain_entities(line):
                         all_entities = extract_all_entities(line)
-                        kwords = contain_keywords(line, 50)
+                        kwords = contain_keywords(line, key_num)
                         line = line.split()
                         l = len(line)
                         # 处理每一对实体
@@ -260,10 +260,12 @@ if __name__ == "__main__":
     statistics_file_list = ["statistics/train.txt", "statistics/develop.txt", "statistics/test.txt"]
     keywords_file_list = ["keywords/unigram.txt", "keywords/bigram.txt"]
 
+    key_num = 50
+
     # sentence = "In brain membranes from spontaneously D_D006973 rats C_D003000 , 10 ( -8 ) to 10 ( -5 ) M , did not influence stereoselective binding of [ 3H ] -C_D009270 ( 8 nM ) , and C_D009270 , 10 ( -8 ) to 10 ( -4 ) M , did not influence C_D003000-suppressible binding of C_-1 ( 1 nM ) ."
     for keywords_file in keywords_file_list:
-        read_keywords(keywords_file, 50)
+        read_keywords(keywords_file, key_num)
     for raw_file, statistics_file, feature_file, CID_file in zip(raw_file_list, statistics_file_list, feature_file_list,
                                                                  CID_file_list):
         read_CID(raw_file)
-        read_sentence(raw_file, statistics_file, feature_file, CID_file)
+        read_sentence(raw_file, statistics_file, feature_file, CID_file, key_num)
