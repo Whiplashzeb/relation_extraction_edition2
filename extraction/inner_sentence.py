@@ -72,7 +72,7 @@ def read_sentence(raw_file, statistics_file, feature_file, CID_file, key_num):
                         # 处理每一对实体
                         # 特征顺序：CID,化学物质位置,疾病位置,距离,顺序,化学物质出现次数,疾病出现次数,关系出现次数,化学物质频率，
                         # 疾病频率，共现频率，包含化学物质数量,包含疾病数量,包含化学物质种类,包含疾病种类,是否在标题中,
-                        # 化学物质是否出现在标题，疾病是否出现在标题，实体对是否出现在标题，关键词特征
+                        # 化学物质是否出现在标题，疾病是否出现在标题，实体对是否出现在标题，动词个数,关键词特征
                         for key, value in all_entities.items():
                             chemical_pos = key[0][0]  # 化学物质位置
                             chemical = key[0][1]
@@ -149,7 +149,7 @@ def extract_all_entities(sentence):
             match = pattern.search(word)
             if match:
                 chemical_entities.append((i, match.group()))
-        if "D_D" in word or "D_D" in word:
+        if "D_D" in word or "D_C" in word:
             pattern = re.compile(r'D_D[-]*\d+|D_C[-]*\d+')
             match = pattern.search(word)
             if match:

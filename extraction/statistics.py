@@ -110,7 +110,7 @@ def extract_all_entities(sentence):
             match = pattern.search(word)
             if match:
                 chemical_entities.append(match.group())
-        if "D_D" in word or "D_D" in word:
+        if "D_D" in word or "D_C" in word:
             pattern = re.compile(r'D_D[-]*\d+|D_C[-]*\d+')
             match = pattern.search(word)
             if match:
@@ -129,4 +129,3 @@ if __name__ == "__main__":
 
     for raw_file, statistics_file in zip(raw_file_list, statistics_file_list):
         count(raw_file, statistics_file)
-
