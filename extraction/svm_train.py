@@ -26,20 +26,20 @@ def standard(file_standard):
 
 
 if __name__ == "__main__":
-    parameter = "-c 512.0 -g 0.03125"
-    y_train, x_train = svm_read_problem("scale/train.scale")
-    y_develop, x_develop = svm_read_problem("scale/develop.scale")
+    parameter = "-c 1024.0 -g 0.03125"
+    y_train, x_train = svm_read_problem("scale/train_in.scale")
+    y_develop, x_develop = svm_read_problem("scale/develop_in.scale")
     model = svm_train(y_train, x_train, parameter)
-    svm_save_model("model/first.model", model)
+    svm_save_model("model/develop_in.model", model)
 
-    model = svm_load_model("model/first.model")
+    model = svm_load_model("model/develop_in.model")
     p_label, p_acc, p_val = svm_predict(y_develop, x_develop, model)
 
-    with open("result/develop.txt", 'w') as fp:
+    with open("result/develop_in.txt", 'w') as fp:
         for label, val in zip(p_label, p_val):
             fp.write(str(label) + '\t' + str(val[0]) + '\n')
 
-    cid_r = extraction("result/develop.txt", "CID_extract/develop.txt")
+    cid_r = extraction("result/develop_in.txt", "CID_extract/develop_in.txt")
     cid_s = standard("CID_standard_in/develop.txt")
 
     count = 0

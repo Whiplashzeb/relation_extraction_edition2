@@ -39,9 +39,7 @@ if __name__ == "__main__":
         for entities, lables in res.items():
             if entities in CID:
                 fp.write('1\t')
-            else:
-                fp.write('0\t')
-            fp.write(entities[0] + ' ' + entities[1] + ': ')
-            for label in lables:
-                fp.write("%d " % (label))
-            fp.write('\n')
+                fp.write(entities[0] + ' ' + entities[1] + ': ')
+                for label in lables:
+                    fp.write("%d " % (label))
+                fp.write('\n')

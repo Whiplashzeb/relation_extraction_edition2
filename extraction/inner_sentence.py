@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 import re
+from stanfordcorenlp import StanfordCoreNLP
 
 # 保存全部的CID关系
 CID = {}
+# 保存全部的关键词
 keywords = []
+# 语法分析器
+nlp = StanfordCoreNLP("/Users/aurora/stanford-corenlp")
 
 
 # 读取全部的CID关系
@@ -62,6 +66,7 @@ def read_sentence(raw_file, statistics_file, feature_file, CID_file, key_num):
                     if contain_entities(line):
                         all_entities = extract_all_entities(line)
                         kwords = contain_keywords(line, key_num)
+                        pos = nlp.pos_tag(line)  # 词性标注
                         line = line.split()
                         l = len(line)
                         # 处理每一对实体
@@ -93,15 +98,15 @@ def read_sentence(raw_file, statistics_file, feature_file, CID_file, key_num):
                             other_chemical_kind = others[2]  # 包含其他化学物质种类
                             other_disease_kind = others[3]  # 包含其他疾病种类
                             chemical_in, disease_in, entities_in = in_title(chemical, disease, title)  # 是否出现在标题中
+                            verb_num = get_verb_num(chemical_pos, disease_pos, pos)
                             fw.write(
-                                "%d 1:%d 2:%d 3:%f 4:%d 5:%d 6:%d 7:%d 8:%f 9:%f 10:%f 11:%d 12:%d 13:%d 14:%d 15:%d 16:%d 17:%d 18:%d" % (
+                                "%d 1:%d 2:%d 3:%f 4:%d 5:%d 6:%d 7:%d 8:%f 9:%f 10:%f 11:%d 12:%d 13:%d 14:%d 15:%d 16:%d 17:%d 18:%d 19:%d" % (
                                     is_cid, chemical_pos, disease_pos, distance, order, chemical_number, disease_number,
                                     cid_number, chemical_freq, disease_freq, cid_freq, other_chemical_number,
                                     other_disease_number, other_chemical_kind, other_disease_kind, title_flag,
-                                    chemical_in,
-                                    disease_in, entities_in))
+                                    chemical_in, disease_in, entities_in, verb_num))
                             for i, value in enumerate(kwords):
-                                fw.write(" %d:%d" % (i + 19, value))
+                                fw.write(" %d:%d" % (i + 20, value))
                             fw.write('\n')
                             fCID.write("%s\t%s\n" % (chemical, disease))
                 line = fp.readline()
@@ -253,10 +258,20 @@ def in_title(chemical, disease, title):
     return (chemical_in, disease_in, entities_in)
 
 
+# 计算包含的动词数
+def get_verb_num(chemical_pos, disease_pos, pos):
+    count = 0
+    for i in range(chemical_pos + 1, disease_pos):
+        if pos[i][1].startswith("VB"):
+            count += 1
+
+    return count
+
+
 if __name__ == "__main__":
     raw_file_list = ["replace/train.txt", "replace/develop.txt", "replace/test.txt"]
-    feature_file_list = ["feature/train.txt", "feature/develop.txt", "feature/test.txt"]
-    CID_file_list = ["CID_extract/train.txt", "CID_extract/develop.txt", "CID_extract/test.txt"]
+    feature_file_list = ["feature/train_in.txt", "feature/develop_in.txt", "feature/test_in.txt"]
+    CID_file_list = ["CID_extract/train_in.txt", "CID_extract/develop_in.txt", "CID_extract/test_in.txt"]
     statistics_file_list = ["statistics/train.txt", "statistics/develop.txt", "statistics/test.txt"]
     keywords_file_list = ["keywords/unigram.txt", "keywords/bigram.txt"]
 
