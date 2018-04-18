@@ -89,7 +89,7 @@ def extract_entity(sentence):
             match = pattern.search(word)
             if match:
                 entity.append(match.group())
-        if "D_D" in word or "D_D" in word:
+        if "D_D" in word or "D_C" in word:
             pattern = re.compile(r'D_D[-]*\d+|D_C[-]*\d+')
             match = pattern.search(word)
             if match:

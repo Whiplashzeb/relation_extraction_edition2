@@ -62,7 +62,7 @@ def read_sentence(raw_file, statistics_file, feature_file, CID_file, key_num):
             if l >= 2:
                 for i in range(l - 1):
                     for j in range(i + 1, l):
-                        if contain_entities(sentences[i], sentences[j]):
+                        if abs(i - j) <= 3 and contain_entities(sentences[i], sentences[j]):
                             all_entities = extract_all_entities(sentences[i], sentences[j])
                             for key, value in all_entities.items():
                                 # 计算句子的长度
@@ -180,7 +180,7 @@ def get_all_entities(sentence):
             match = pattern.search(word)
             if match:
                 chemical.append((match.group(), i))
-        if "D_D" in word or "D_D" in word:
+        if "D_D" in word or "D_C" in word:
             pattern = re.compile(r'D_D[-]*\d+|D_C[-]*\d+')
             match = pattern.search(word)
             if match:
@@ -239,7 +239,7 @@ def contain_others(sentence):
             if match:
                 chemical.add(word)
                 chemical_number += 1
-        if "D_D" in word or "D_D" in word:
+        if "D_D" in word or "D_C" in word:
             pattern = re.compile(r'D_D[-]*\d+|D_C[-]*\d+')
             match = pattern.search(word)
             if match:
