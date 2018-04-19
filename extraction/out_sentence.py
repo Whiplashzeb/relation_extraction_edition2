@@ -38,7 +38,6 @@ def read_sentence(raw_file, statistics_file, feature_file, CID_file, key_num):
         passage = fp.readline()
 
         while len(passage) > 0:
-            print(passage)
             title = ""
             all_chemical, all_disease, all_cid, all_chemical_num, all_disease_num, all_cid_num = get_number(passage,
                                                                                                             statistics_file)
@@ -76,7 +75,6 @@ def read_sentence(raw_file, statistics_file, feature_file, CID_file, key_num):
                                 disease_pos = key[1][1]  # 疾病位置
                                 is_cid = value[0]  # 是否为CID关系
                                 order = value[1]  # 顺序
-                                distance = 0  # 距离
                                 if order == 0:
                                     distance = float(l1 - chemical_pos + disease_pos) / l_two
                                     others = contain_others(
