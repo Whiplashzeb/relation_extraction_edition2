@@ -2,7 +2,7 @@ from libsvm.python.svmutil import *
 from svm_train import extraction, standard
 
 if __name__ == "__main__":
-    parameter = "-c 1024.0 -g 0.03125"
+    parameter = "-c 64.0 -g 0.03125"
     y_train, x_train = svm_read_problem("scale/train_out.scale")
     y_develop, x_develop = svm_read_problem("scale/develop_out.scale")
     model = svm_train(y_train, x_train, parameter)

@@ -16,9 +16,9 @@ def entities_label(entity_file, result_file):
 
 
 # 获取标准CID
-def standard(file_standard):
+def standard(standard_file):
     result = set()
-    with open(file_standard) as fp:
+    with open(standard_file) as fp:
         line = fp.readline()
         while len(line) > 0:
             entity = line.split()
@@ -26,14 +26,21 @@ def standard(file_standard):
             line = fp.readline()
     return result
 
+# 查询跨句的占比
+def get_rate():
+    pass
+
 
 if __name__ == "__main__":
     entity_file = "CID_extract/develop.txt"
     result_file = "result/develop.txt"
     standard_file = "CID_standard_in/develop.txt"
+    
 
     res = entities_label(entity_file, result_file)
     CID = standard(standard_file)
+    
+    
 
     with open("analysis/entities_label.txt", 'w') as fp:
         for entities, lables in res.items():
