@@ -26,10 +26,6 @@ def standard(standard_file):
             line = fp.readline()
     return result
 
-# 查询跨句的占比
-def get_rate():
-    pass
-
 
 if __name__ == "__main__":
     entity_file = "CID_extract/develop.txt"
