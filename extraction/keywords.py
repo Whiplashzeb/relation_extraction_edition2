@@ -1,4 +1,4 @@
-from inner_sentence import contain_entities
+from extraction.inner_sentence import contain_entities
 import re
 import string
 

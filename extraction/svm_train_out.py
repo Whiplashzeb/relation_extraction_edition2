@@ -1,5 +1,5 @@
-from libsvm.python.svmutil import *
-from svm_train import extraction, standard
+from extraction.libsvm.python.svmutil import *
+from extraction.svm_train import extraction, standard
 
 if __name__ == "__main__":
     parameter = "-c 64.0 -g 0.03125"

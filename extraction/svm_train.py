@@ -1,4 +1,4 @@
-from libsvm.python.svmutil import *
+from extraction.libsvm.python.svmutil import *
 
 
 def extraction(file_label, file_entity):
