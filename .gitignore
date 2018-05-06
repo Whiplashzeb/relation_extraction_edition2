@@ -16,6 +16,7 @@ libsvm
 scale
 model
 result
+knowledge
 
 # Distribution / packaging
 .Python

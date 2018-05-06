@@ -14,6 +14,29 @@ def extraction(file_label, file_entity):
     return res
 
 
+def extraction_2(file_label, file_entity):
+    fp1 = open(file_label).readlines()
+    fp2 = open(file_entity).readlines()
+
+    entities = dict()
+    for i in range(len(fp1)):
+        r = int(fp1[i].split()[0][0])
+        if r == 0:
+            r = -1
+        entity = fp2[i].split()
+        cd = (entity[0], entity[1])
+        if cd not in entities.keys():
+            entities[cd] = r
+        else:
+            entities[cd] += r
+
+    res = set()
+    for cd, i in entities.items():
+        if i > -2:
+            res.add(cd)
+
+    return res
+
 def standard(file_standard):
     result = set()
     with open(file_standard) as fp:
@@ -26,7 +49,7 @@ def standard(file_standard):
 
 
 if __name__ == "__main__":
-    parameter = "-c 1024.0 -g 0.03125"
+    parameter = "-c 64.0 -g 0.0078125"
     y_train, x_train = svm_read_problem("scale/train_in.scale")
     y_develop, x_develop = svm_read_problem("scale/develop_in.scale")
     model = svm_train(y_train, x_train, parameter)
@@ -53,4 +76,4 @@ if __name__ == "__main__":
     F = 2 * count / (extract_total + standard_total)
 
     print("%d\t%d\t%d\t%.4f%%\t%.4f%%\t%.4f%%\n" % (
-    count, extract_total, standard_total, count / extract_total * 100, count / standard_total * 100, F * 100))
+        count, extract_total, standard_total, count / extract_total * 100, count / standard_total * 100, F * 100))

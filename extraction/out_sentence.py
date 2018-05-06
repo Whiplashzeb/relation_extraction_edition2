@@ -2,6 +2,8 @@ import re
 
 CID = {}
 keywords = []
+# 保存全部的知识
+knowledge = {}
 
 
 # 读取全部的CID关系
@@ -26,6 +28,27 @@ def read_keywords(file, num):
             line = fp.readline()[:-1]
             keywords.append(line)
             count += 1
+
+
+def read_knowledge(file):
+    with open(file) as fp:
+        line = fp.readline().split()
+        while len(line) > 0:
+            c_pattern = re.compile(r'C\d+|D\d+')
+            c_match = c_pattern.search(line[0])
+            if c_match:
+                chemical = c_match.group()[1:]
+
+            d_pattern = re.compile(r'D\d+|C\d+')
+            d_match = d_pattern.search(line[1])
+            if d_match:
+                disease = d_match.group()[1:]
+
+            if chemical in knowledge:
+                knowledge[chemical].add(disease)
+            else:
+                knowledge[chemical] = set([disease])
+            line = fp.readline().split()
 
 
 # 专注于2个句子本身的特征，不考虑中间跨越的整句
@@ -100,16 +123,17 @@ def read_sentence(raw_file, statistics_file, feature_file, CID_file, key_num):
                                 other_chemical_kind = others[2]  # 包含其他化学物质种类
                                 other_disease_kind = others[3]  # 包含其他疾病种类
                                 chemical_in, disease_in, entities_in = in_title(chemical, disease, title)  # 是否出现在标题中
+                                is_knowledge = in_knowledge(chemical, disease)
                                 kwords = contain_keywords(sentences[i] + sentences[j], key_num)
                                 fw.write(
-                                    "%d 1:%d 2:%d 3:%f 4:%d 5:%d 6:%d 7:%d 8:%f 9:%f 10:%f 11:%d 12:%d 13:%d 14:%d 15:%d 16:%d 17:%d 18:%d 19:%d" % (
+                                    "%d 1:%d 2:%d 3:%f 4:%d 5:%d 6:%d 7:%d 8:%f 9:%f 10:%f 11:%d 12:%d 13:%d 14:%d 15:%d 16:%d 17:%d 18:%d 19:%d 20:%d" % (
                                         is_cid, chemical_pos, disease_pos, distance, order, chemical_number,
                                         disease_number,
                                         cid_number, chemical_freq, disease_freq, cid_freq, other_chemical_number,
                                         other_disease_number, other_chemical_kind, other_disease_kind, 1,
-                                        chemical_in, disease_in, entities_in, abs(i - j)))
+                                        chemical_in, disease_in, entities_in, abs(i - j), is_knowledge))
                                 for position, value in enumerate(kwords):
-                                    fw.write(" %d:%d" % (position + 20, value))
+                                    fw.write(" %d:%d" % (position + 21, value))
                                 fw.write('\n')
                                 fCID.write("%s\t%s\n" % (chemical, disease))
             passage = line
@@ -280,14 +304,28 @@ def contain_keywords(sentence, num):
     return res
 
 
+# 判断是否在知识内
+def in_knowledge(c, d):
+    global knowledge
+
+    c = c[3:]
+    d = d[3:]
+    if c in knowledge:
+        if d in knowledge[c]:
+            return True
+    return False
+
+
 if __name__ == "__main__":
     raw_file_list = ["replace/train.txt", "replace/develop.txt", "replace/test.txt"]
     feature_file_list = ["feature/train_out.txt", "feature/develop_out.txt", "feature/test_out.txt"]
     CID_file_list = ["CID_extract/train_out.txt", "CID_extract/develop_out.txt", "CID_extract/test_out.txt"]
     statistics_file_list = ["statistics/train.txt", "statistics/develop.txt", "statistics/test.txt"]
     keywords_file_list = ["keywords/unigram.txt", "keywords/bigram.txt"]
-
+    knowledge_file = "knowledge/knowledge.txt"
     key_num = 50
+
+    read_knowledge(knowledge_file)
 
     for keywords_file in keywords_file_list:
         read_keywords(keywords_file, key_num)

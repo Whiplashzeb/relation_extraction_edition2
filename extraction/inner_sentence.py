@@ -6,6 +6,8 @@ from stanfordcorenlp import StanfordCoreNLP
 CID = {}
 # 保存全部的关键词
 keywords = []
+# 保存全部的知识
+knowledge = {}
 # 语法分析器
 nlp = StanfordCoreNLP("/Users/aurora/stanford-corenlp")
 
@@ -22,6 +24,27 @@ def read_CID(file):
                 else:
                     CID[line[1]] = [line[2]]
             line = fp.readline()
+
+
+def read_knowledge(file):
+    with open(file) as fp:
+        line = fp.readline().split()
+        while len(line) > 0:
+            c_pattern = re.compile(r'C\d+|D\d+')
+            c_match = c_pattern.search(line[0])
+            if c_match:
+                chemical = c_match.group()[1:]
+
+            d_pattern = re.compile(r'D\d+|C\d+')
+            d_match = d_pattern.search(line[1])
+            if d_match:
+                disease = d_match.group()[1:]
+
+            if chemical in knowledge:
+                knowledge[chemical].add(disease)
+            else:
+                knowledge[chemical] = set([disease])
+            line = fp.readline().split()
 
 
 # 读取关键词unigram和bigram
@@ -99,14 +122,15 @@ def read_sentence(raw_file, statistics_file, feature_file, CID_file, key_num):
                             other_disease_kind = others[3]  # 包含其他疾病种类
                             chemical_in, disease_in, entities_in = in_title(chemical, disease, title)  # 是否出现在标题中
                             verb_num = get_verb_num(chemical_pos, disease_pos, pos)
+                            is_knowledge = in_knowledge(chemical, disease)
                             fw.write(
-                                "%d 1:%d 2:%d 3:%f 4:%d 5:%d 6:%d 7:%d 8:%f 9:%f 10:%f 11:%d 12:%d 13:%d 14:%d 15:%d 16:%d 17:%d 18:%d 19:%d" % (
+                                "%d 1:%d 2:%d 3:%f 4:%d 5:%d 6:%d 7:%d 8:%f 9:%f 10:%f 11:%d 12:%d 13:%d 14:%d 15:%d 16:%d 17:%d 18:%d 19:%d 20:%d" % (
                                     is_cid, chemical_pos, disease_pos, distance, order, chemical_number, disease_number,
                                     cid_number, chemical_freq, disease_freq, cid_freq, other_chemical_number,
                                     other_disease_number, other_chemical_kind, other_disease_kind, title_flag,
-                                    chemical_in, disease_in, entities_in, verb_num))
+                                    chemical_in, disease_in, entities_in, verb_num, is_knowledge))
                             for i, value in enumerate(kwords):
-                                fw.write(" %d:%d" % (i + 20, value))
+                                fw.write(" %d:%d" % (i + 21, value))
                             fw.write('\n')
                             fCID.write("%s\t%s\n" % (chemical, disease))
                 line = fp.readline()
@@ -268,16 +292,30 @@ def get_verb_num(chemical_pos, disease_pos, pos):
     return count
 
 
+# 判断是否在知识内
+def in_knowledge(c, d):
+    global knowledge
+
+    c = c[3:]
+    d = d[3:]
+    if c in knowledge:
+        if d in knowledge[c]:
+            return True
+    return False
+
+
 if __name__ == "__main__":
     raw_file_list = ["replace/train.txt", "replace/develop.txt", "replace/test.txt"]
     feature_file_list = ["feature/train_in.txt", "feature/develop_in.txt", "feature/test_in.txt"]
     CID_file_list = ["CID_extract/train_in.txt", "CID_extract/develop_in.txt", "CID_extract/test_in.txt"]
     statistics_file_list = ["statistics/train.txt", "statistics/develop.txt", "statistics/test.txt"]
     keywords_file_list = ["keywords/unigram.txt", "keywords/bigram.txt"]
-
+    knowledge_file = "knowledge/knowledge.txt"
     key_num = 50
 
-    # sentence = "In brain membranes from spontaneously D_D006973 rats C_D003000 , 10 ( -8 ) to 10 ( -5 ) M , did not influence stereoselective binding of [ 3H ] -C_D009270 ( 8 nM ) , and C_D009270 , 10 ( -8 ) to 10 ( -4 ) M , did not influence C_D003000-suppressible binding of C_-1 ( 1 nM ) ."
+    read_knowledge(knowledge_file)
+
+    sentence = "In brain membranes from spontaneously D_D006973 rats C_D003000 , 10 ( -8 ) to 10 ( -5 ) M , did not influence stereoselective binding of [ 3H ] -C_D009270 ( 8 nM ) , and C_D009270 , 10 ( -8 ) to 10 ( -4 ) M , did not influence C_D003000-suppressible binding of C_-1 ( 1 nM ) ."
     for keywords_file in keywords_file_list:
         read_keywords(keywords_file, key_num)
     for raw_file, statistics_file, feature_file, CID_file in zip(raw_file_list, statistics_file_list, feature_file_list,
